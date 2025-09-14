@@ -7,12 +7,12 @@ def init(context):
     scheduler.run_monthly(rebalance,1)
 
 def rebalance(context, bar_dict):
-    # Ê×ÏÈ¹ıÂËµô²»ÏëÒªµÄ¹ÉÆ±
+    # é¦–å…ˆè¿‡æ»¤æ‰ä¸æƒ³è¦çš„è‚¡ç¥¨
     stocks = filter_paused(all_instruments(type='CS').order_book_id)
     stocks = filter_st(stocks)
     stocks = filter_new(stocks)
 
-    #²éÑ¯ÏëÒªµÄÖ¸±ê
+    #æŸ¥è¯¢æƒ³è¦çš„æŒ‡æ ‡
     fundamental_df = get_fundamentals(
         query(
             fundamentals.eod_derivative_indicator.pb_ratio,
@@ -22,29 +22,29 @@ def rebalance(context, bar_dict):
         )
     ).T.dropna()
 
-    #Ô¤´¦Àí²Ù×÷£º1.3sigma 2.standard 3.neutral
+    #é¢„å¤„ç†æ“ä½œï¼š1.3sigma 2.standard 3.neutral
     no_extreme = filter_3sigma(fundamental_df['pb_ratio'])
     pb_ratio_standard = standard(no_extreme)
     pb_ratio_neutral = neutral(pb_ratio_standard,fundamental_df['market_cap'])
 
-    #»ùÓÚÒò×Ó¶Ô³Ø×Ó×öÉ¸Ñ¡
+    #åŸºäºå› å­å¯¹æ± å­åšç­›é€‰
     q = pb_ratio_neutral.quantile(0.2)
     storck_list = pb_ratio_neutral[pb_ratio_neutral <= q].index
     context.storck_list = storck_list
 
-    #ÄÃµ½ÊÖÀïÓĞµÄ
+    #æ‹¿åˆ°æ‰‹é‡Œæœ‰çš„
     context.last_main_symbol = context.portfolio.positions
-    #É¾µô²»ÔÚµ±Ç°Òò×ÓÑ¡ÖĞµÄ³Ø×ÓÖĞµÄ¹ÉÆ±
+    #åˆ æ‰ä¸åœ¨å½“å‰å› å­é€‰ä¸­çš„æ± å­ä¸­çš„è‚¡ç¥¨
     context.detele = set(context.last_main_symbol).difference(context.storck_list)
 
     if len(context.detele) != 0:
-        print ('µ÷²Ö')
+        print ('è°ƒä»“')
         for stock in context.detele:
             order_target_percent(stock,0)
     for stock in context.storck_list:
         order_target_percent(stock,1/len(context.storck_list))
 
-# È¥¼«Öµ²Ù×÷
+# å»æå€¼æ“ä½œ
 def filter_3sigma(series,n=3):
     mean = series.mean()
     std = series.mean()
@@ -52,42 +52,42 @@ def filter_3sigma(series,n=3):
     min_range = mean - n*std
     return np.clip(series,min_range,max_range)
 
-# ±ê×¼»¯²Ù×÷
+# æ ‡å‡†åŒ–æ“ä½œ
 def standard(series):
     mean = series.mean()
     std = series.mean()
     return (series - mean)/std
 
-# ÖĞĞÔ»¯²Ù×÷
+# ä¸­æ€§åŒ–æ“ä½œ
 def neutral(factor,market_cap):
     y = factor
     x = market_cap
     result = sm.OLS(y.astype(float),x.astype(float)).fit()
     return result.resid
 
-# ÅĞ¶ÏÊÇ·ñÍ£ÅÆ    
+# åˆ¤æ–­æ˜¯å¦åœç‰Œ    
 def filter_paused(stock_list):
     return [stock for stock in stock_list if not is_suspended(stock)]
 
-#ÅĞ¶ÏÊÇ·ñST¹É
+#åˆ¤æ–­æ˜¯å¦STè‚¡
 def filter_st(stock_list):
     return [stock for stock in stock_list if not is_st_stock(stock)]
 
-#ÅĞ¶ÏÊÇ·ñÊÇĞÂ¹É
+#åˆ¤æ–­æ˜¯å¦æ˜¯æ–°è‚¡
 def filter_new(stock_list):
     return [stock for stock in stock_list if instruments(stock).days_from_listed() >= 180]
 
-# before_trading´Ëº¯Êı»áÔÚÃ¿Ìì½»Ò×¿ªÊ¼Ç°±»µ÷ÓÃ£¬µ±ÌìÖ»»á±»µ÷ÓÃÒ»´Î
+# before_tradingæ­¤å‡½æ•°ä¼šåœ¨æ¯å¤©äº¤æ˜“å¼€å§‹å‰è¢«è°ƒç”¨ï¼Œå½“å¤©åªä¼šè¢«è°ƒç”¨ä¸€æ¬¡
 def before_trading(context):
     pass
 
 
-# ÄãÑ¡ÔñµÄÖ¤È¯µÄÊı¾İ¸üĞÂ½«»á´¥·¢´Ë¶ÎÂß¼­£¬ÀıÈçÈÕ»ò·ÖÖÓÀúÊ·Êı¾İÇĞÆ¬»òÕßÊÇÊµÊ±Êı¾İÇĞÆ¬¸üĞÂ
+# ä½ é€‰æ‹©çš„è¯åˆ¸çš„æ•°æ®æ›´æ–°å°†ä¼šè§¦å‘æ­¤æ®µé€»è¾‘ï¼Œä¾‹å¦‚æ—¥æˆ–åˆ†é’Ÿå†å²æ•°æ®åˆ‡ç‰‡æˆ–è€…æ˜¯å®æ—¶æ•°æ®åˆ‡ç‰‡æ›´æ–°
 def handle_bar(context, bar_dict):
     pass
 
 
-# after_tradingº¯Êı»áÔÚÃ¿Ìì½»Ò×½áÊøºó±»µ÷ÓÃ£¬µ±ÌìÖ»»á±»µ÷ÓÃÒ»´Î
+# after_tradingå‡½æ•°ä¼šåœ¨æ¯å¤©äº¤æ˜“ç»“æŸåè¢«è°ƒç”¨ï¼Œå½“å¤©åªä¼šè¢«è°ƒç”¨ä¸€æ¬¡
 def after_trading(context):
     pass
 

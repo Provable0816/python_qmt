@@ -1,13 +1,13 @@
-# ¿ÉÒÔ×Ô¼ºimportÎÒÃÇÆ½Ì¨Ö§³ÖµÄµÚÈı·½pythonÄ£¿é£¬±ÈÈçpandas¡¢numpyµÈ¡£
+# å¯ä»¥è‡ªå·±importæˆ‘ä»¬å¹³å°æ”¯æŒçš„ç¬¬ä¸‰æ–¹pythonæ¨¡å—ï¼Œæ¯”å¦‚pandasã€numpyç­‰ã€‚
 
-# ÔÚÕâ¸ö·½·¨ÖĞ±àĞ´ÈÎºÎµÄ³õÊ¼»¯Âß¼­¡£context¶ÔÏó½«»áÔÚÄãµÄËã·¨²ßÂÔµÄÈÎºÎ·½·¨Ö®¼ä×ö´«µİ¡£
+# åœ¨è¿™ä¸ªæ–¹æ³•ä¸­ç¼–å†™ä»»ä½•çš„åˆå§‹åŒ–é€»è¾‘ã€‚contextå¯¹è±¡å°†ä¼šåœ¨ä½ çš„ç®—æ³•ç­–ç•¥çš„ä»»ä½•æ–¹æ³•ä¹‹é—´åšä¼ é€’ã€‚
 import numpy as np
 import pandas as pd
 def init(context):
-    # ÔÚcontextÖĞ±£´æÈ«¾Ö±äÁ¿
-    # ÊµÊ±´òÓ¡ÈÕÖ¾
+    # åœ¨contextä¸­ä¿å­˜å…¨å±€å˜é‡
+    # å®æ—¶æ‰“å°æ—¥å¿—
     # logger.info("RunInfo: {}".format(context.run_info))
-    context.stocks = index_components('»¦Éî300')
+    context.stocks = index_components('æ²ªæ·±300')
     context.lastrank = []
     scheduler.run_monthly(rebalance,1)
 
@@ -39,49 +39,49 @@ def get_holdings(context):
 def get_stocks(context):
 
     fundamental_df_up = get_fundamentals(query(
-        fundamentals.financial_indicator.diluted_earnings_per_share, #Ã¿¹ÉÊÕÒæEPS Ô½¸ßÔ½ºÃ
-        fundamentals.financial_indicator.return_on_equity,# ¾»×Ê²úÊÕÒæÂÊ Ô½¸ßÔ½ºÃ
-        fundamentals.financial_indicator.return_on_invested_capital,#¾»×Ê²ú»Ø±¨ÂÊ£¬Ô½¸ßÔ½ºÃ
+        fundamentals.financial_indicator.diluted_earnings_per_share, #æ¯è‚¡æ”¶ç›ŠEPS è¶Šé«˜è¶Šå¥½
+        fundamentals.financial_indicator.return_on_equity,# å‡€èµ„äº§æ”¶ç›Šç‡ è¶Šé«˜è¶Šå¥½
+        fundamentals.financial_indicator.return_on_invested_capital,#å‡€èµ„äº§å›æŠ¥ç‡ï¼Œè¶Šé«˜è¶Šå¥½
     ).filter(fundamentals.income_statement.stockcode.in_(context.stocks))).T
 
     fundamental_df_down = get_fundamentals(query(
-        fundamentals.financial_indicator.debt_to_asset_ratio, #×Ê²ú¸ºÕ®ÂÊ Ô½µÍÔ½ºÃ
-        fundamentals.eod_derivative_indicator.pb_ratio,# pb Ô½µÍÔ½ºÃ
-        fundamentals.eod_derivative_indicator.market_cap,#ÊĞÖµ
+        fundamentals.financial_indicator.debt_to_asset_ratio, #èµ„äº§è´Ÿå€ºç‡ è¶Šä½è¶Šå¥½
+        fundamentals.eod_derivative_indicator.pb_ratio,# pb è¶Šä½è¶Šå¥½
+        fundamentals.eod_derivative_indicator.market_cap,#å¸‚å€¼
     ).filter(fundamentals.income_statement.stockcode.in_(context.stocks))).T
 
-    for fator in fundamental_df_up.columns.tolist(): #¶ÔÔ½¸ßÔ½ºÃ½øĞĞ´ò·Ö
+    for fator in fundamental_df_up.columns.tolist(): #å¯¹è¶Šé«˜è¶Šå¥½è¿›è¡Œæ‰“åˆ†
         fundamental_df_up.sort_values(by=fator,inplace=True)
         fundamental_df_up[fator] = np.linspace(1,len(fundamental_df_up),len(fundamental_df_up))
-    for fator in fundamental_df_down.columns.tolist(): #¶ÔÔ½µÍÔ½ºÃ½øĞĞ´ò·Ö
+    for fator in fundamental_df_down.columns.tolist(): #å¯¹è¶Šä½è¶Šå¥½è¿›è¡Œæ‰“åˆ†
         fundamental_df_down.sort_values(by=fator,inplace=True)
         fundamental_df_down[fator] = np.linspace(len(fundamental_df_up),1,len(fundamental_df_up))
-    # Æ´½Ó
+    # æ‹¼æ¥
     fundamental_df_rank = fundamental_df_down.join(fundamental_df_up)
     fundamental_df_rank['score'] = np.zeros([len(fundamental_df_rank),1])
     
-    #¼ÆËã×Ü·Ö²¢ÅÅĞò
+    #è®¡ç®—æ€»åˆ†å¹¶æ’åº
     fundamental_df_rank = fundamental_df_rank.cumsum(axis=1).sort_values(by='score',ascending=False)
     rank = fundamental_df_rank.score
     return rank.index.tolist()[:10]
-# before_trading´Ëº¯Êı»áÔÚÃ¿Ìì²ßÂÔ½»Ò×¿ªÊ¼Ç°±»µ÷ÓÃ£¬µ±ÌìÖ»»á±»µ÷ÓÃÒ»´Î
+# before_tradingæ­¤å‡½æ•°ä¼šåœ¨æ¯å¤©ç­–ç•¥äº¤æ˜“å¼€å§‹å‰è¢«è°ƒç”¨ï¼Œå½“å¤©åªä¼šè¢«è°ƒç”¨ä¸€æ¬¡
 def before_trading(context):
     pass
 
 
-# ÄãÑ¡ÔñµÄÖ¤È¯µÄÊı¾İ¸üĞÂ½«»á´¥·¢´Ë¶ÎÂß¼­£¬ÀıÈçÈÕ»ò·ÖÖÓÀúÊ·Êı¾İÇĞÆ¬»òÕßÊÇÊµÊ±Êı¾İÇĞÆ¬¸üĞÂ
+# ä½ é€‰æ‹©çš„è¯åˆ¸çš„æ•°æ®æ›´æ–°å°†ä¼šè§¦å‘æ­¤æ®µé€»è¾‘ï¼Œä¾‹å¦‚æ—¥æˆ–åˆ†é’Ÿå†å²æ•°æ®åˆ‡ç‰‡æˆ–è€…æ˜¯å®æ—¶æ•°æ®åˆ‡ç‰‡æ›´æ–°
 def handle_bar(context, bar_dict):
-    # ¿ªÊ¼±àĞ´ÄãµÄÖ÷ÒªµÄËã·¨Âß¼­
+    # å¼€å§‹ç¼–å†™ä½ çš„ä¸»è¦çš„ç®—æ³•é€»è¾‘
 
-    # bar_dict[order_book_id] ¿ÉÒÔÄÃµ½Ä³¸öÖ¤È¯µÄbarĞÅÏ¢
-    # context.portfolio ¿ÉÒÔÄÃµ½ÏÖÔÚµÄÍ¶×Ê×éºÏĞÅÏ¢
+    # bar_dict[order_book_id] å¯ä»¥æ‹¿åˆ°æŸä¸ªè¯åˆ¸çš„barä¿¡æ¯
+    # context.portfolio å¯ä»¥æ‹¿åˆ°ç°åœ¨çš„æŠ•èµ„ç»„åˆä¿¡æ¯
 
-    # Ê¹ÓÃorder_shares(id_or_ins, amount)·½·¨½øĞĞÂäµ¥
+    # ä½¿ç”¨order_shares(id_or_ins, amount)æ–¹æ³•è¿›è¡Œè½å•
 
-    # TODO: ¿ªÊ¼±àĞ´ÄãµÄËã·¨°É£¡
+    # TODO: å¼€å§‹ç¼–å†™ä½ çš„ç®—æ³•å§ï¼
     #order_shares(context.s1, 1000)
     pass
 
-# after_tradingº¯Êı»áÔÚÃ¿Ìì½»Ò×½áÊøºó±»µ÷ÓÃ£¬µ±ÌìÖ»»á±»µ÷ÓÃÒ»´Î
+# after_tradingå‡½æ•°ä¼šåœ¨æ¯å¤©äº¤æ˜“ç»“æŸåè¢«è°ƒç”¨ï¼Œå½“å¤©åªä¼šè¢«è°ƒç”¨ä¸€æ¬¡
 def after_trading(context):
     pass
