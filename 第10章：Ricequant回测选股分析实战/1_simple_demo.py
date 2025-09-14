@@ -1,14 +1,14 @@
-# ¿ÉÒÔ×Ô¼ºimportÎÒÃÇÆ½Ì¨Ö§³ÖµÄµÚÈı·½pythonÄ£¿é£¬±ÈÈçpandas¡¢numpyµÈ¡£
+# å¯ä»¥è‡ªå·±importæˆ‘ä»¬å¹³å°æ”¯æŒçš„ç¬¬ä¸‰æ–¹pythonæ¨¡å—ï¼Œæ¯”å¦‚pandasã€numpyç­‰ã€‚
 
-# ÔÚÕâ¸ö·½·¨ÖĞ±àĞ´ÈÎºÎµÄ³õÊ¼»¯Âß¼­¡£context¶ÔÏó½«»áÔÚÄãµÄËã·¨²ßÂÔµÄÈÎºÎ·½·¨Ö®¼ä×ö´«µİ¡£
+# åœ¨è¿™ä¸ªæ–¹æ³•ä¸­ç¼–å†™ä»»ä½•çš„åˆå§‹åŒ–é€»è¾‘ã€‚contextå¯¹è±¡å°†ä¼šåœ¨ä½ çš„ç®—æ³•ç­–ç•¥çš„ä»»ä½•æ–¹æ³•ä¹‹é—´åšä¼ é€’ã€‚
 def init(context):
-    # ÔÚcontextÖĞ±£´æÈ«¾Ö±äÁ¿
-    context.hs300 = index_components("»¦Éî300")
+    # åœ¨contextä¸­ä¿å­˜å…¨å±€å˜é‡
+    context.hs300 = index_components("æ²ªæ·±300")
     scheduler.run_monthly(filter_data,tradingday=1)
-    # ÊµÊ±´òÓ¡ÈÕÖ¾
+    # å®æ—¶æ‰“å°æ—¥å¿—
     # logger.info("RunInfo: {}".format(context.run_info))
 
-# before_trading´Ëº¯Êı»áÔÚÃ¿Ìì²ßÂÔ½»Ò×¿ªÊ¼Ç°±»µ÷ÓÃ£¬µ±ÌìÖ»»á±»µ÷ÓÃÒ»´Î
+# before_tradingæ­¤å‡½æ•°ä¼šåœ¨æ¯å¤©ç­–ç•¥äº¤æ˜“å¼€å§‹å‰è¢«è°ƒç”¨ï¼Œå½“å¤©åªä¼šè¢«è°ƒç”¨ä¸€æ¬¡
 def before_trading(context):
     """
     context.fundamentals_df = get_fundamentals(query(
@@ -38,16 +38,16 @@ def filter_data(context, bar_dict):
     context.hs300_10 = context.fundamentals_df.T.index 
 
 
-# ÄãÑ¡ÔñµÄÖ¤È¯µÄÊı¾İ¸üĞÂ½«»á´¥·¢´Ë¶ÎÂß¼­£¬ÀıÈçÈÕ»ò·ÖÖÓÀúÊ·Êı¾İÇĞÆ¬»òÕßÊÇÊµÊ±Êı¾İÇĞÆ¬¸üĞÂ
+# ä½ é€‰æ‹©çš„è¯åˆ¸çš„æ•°æ®æ›´æ–°å°†ä¼šè§¦å‘æ­¤æ®µé€»è¾‘ï¼Œä¾‹å¦‚æ—¥æˆ–åˆ†é’Ÿå†å²æ•°æ®åˆ‡ç‰‡æˆ–è€…æ˜¯å®æ—¶æ•°æ®åˆ‡ç‰‡æ›´æ–°
 def handle_bar(context, bar_dict):
-    # ¿ªÊ¼±àĞ´ÄãµÄÖ÷ÒªµÄËã·¨Âß¼­
+    # å¼€å§‹ç¼–å†™ä½ çš„ä¸»è¦çš„ç®—æ³•é€»è¾‘
 
-    # bar_dict[order_book_id] ¿ÉÒÔÄÃµ½Ä³¸öÖ¤È¯µÄbarĞÅÏ¢
-    # context.portfolio ¿ÉÒÔÄÃµ½ÏÖÔÚµÄÍ¶×Ê×éºÏĞÅÏ¢
+    # bar_dict[order_book_id] å¯ä»¥æ‹¿åˆ°æŸä¸ªè¯åˆ¸çš„barä¿¡æ¯
+    # context.portfolio å¯ä»¥æ‹¿åˆ°ç°åœ¨çš„æŠ•èµ„ç»„åˆä¿¡æ¯
 
-    # Ê¹ÓÃorder_shares(id_or_ins, amount)·½·¨½øĞĞÂäµ¥
+    # ä½¿ç”¨order_shares(id_or_ins, amount)æ–¹æ³•è¿›è¡Œè½å•
 
-    # TODO: ¿ªÊ¼±àĞ´ÄãµÄËã·¨°É£¡
+    # TODO: å¼€å§‹ç¼–å†™ä½ çš„ç®—æ³•å§ï¼
     # order_shares(context.s1, 1000)
     if len(context.portfolio.positions.keys()) !=0 :
         for stock in context.portfolio.positions.keys():
@@ -59,6 +59,6 @@ def handle_bar(context, bar_dict):
 
 
 
-# after_tradingº¯Êı»áÔÚÃ¿Ìì½»Ò×½áÊøºó±»µ÷ÓÃ£¬µ±ÌìÖ»»á±»µ÷ÓÃÒ»´Î
+# after_tradingå‡½æ•°ä¼šåœ¨æ¯å¤©äº¤æ˜“ç»“æŸåè¢«è°ƒç”¨ï¼Œå½“å¤©åªä¼šè¢«è°ƒç”¨ä¸€æ¬¡
 def after_trading(context):
     pass
